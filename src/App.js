@@ -32,6 +32,21 @@ class App extends Component {
     this.setState({ recettes });
   };
 
+  majRecette = (key, newRecette) => {
+    // on fait une copie de tout le state existant
+    const recettes = { ...this.state.recettes };
+    // on passe la clé et la recette modifiée 
+    recettes[key] = newRecette;
+    // mise à jour de cette recette
+    this.setState({ recettes });
+  };
+
+  supprimerRecette = key => {
+    const recettes = { ...this.state.recettes };
+    recettes[key] = null;
+    this.setState({ recettes })
+  }
+
   chargerExemple = recettes => this.setState({ recettes });
 
   render() {
@@ -45,7 +60,10 @@ class App extends Component {
         <h1>Bonjour {this.state.pseudo}</h1>
         <div className="cards">{cards}</div>
         <Admin
+          recettes={this.state.recettes}
           ajouterRecette={this.ajouterRecette}
+          majRecette={this.majRecette}
+          supprimerRecette={this.supprimerRecette}
           chargerExemple={() => this.chargerExemple(recettes)}
         />
       </div>
