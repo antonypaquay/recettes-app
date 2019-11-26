@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import base from "./base";
 // CSS
 import "./App.css";
 import Header from "./components/Header";
@@ -13,6 +14,24 @@ class App extends Component {
     recettes: {}
   };
 
+  componentDidMount() {
+    this.ref = base.syncState(`/${this.state.pseudo}/recettes`, {
+      context: this,
+      state: "recettes"
+    });
+  }
+
+  componentWillUnmount() {
+    //close the connection
+    base.removeBinding(this.ref);
+  }
+
+  ajouterRecette = recette => {
+    const recettes = { ...this.state.recettes };
+    recettes[`recette-${Date.now()}`] = recette;
+    this.setState({ recettes });
+  };
+
   chargerExemple = recettes => this.setState({ recettes });
 
   render() {
@@ -25,7 +44,10 @@ class App extends Component {
         <Header pseudo={this.state.pseudo} />
         <h1>Bonjour {this.state.pseudo}</h1>
         <div className="cards">{cards}</div>
-        <Admin chargerExemple={() => this.chargerExemple(recettes)} />
+        <Admin
+          ajouterRecette={this.ajouterRecette}
+          chargerExemple={() => this.chargerExemple(recettes)}
+        />
       </div>
     );
   }
