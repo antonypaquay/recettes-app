@@ -1,75 +1,40 @@
-import React, { Component } from "react";
-import base from "./base";
+import React from "react";
 // CSS
 import "./App.css";
 import Header from "./components/Header";
 import Admin from "./components/Admin";
 import Card from "./components/Card";
-// import recettes
-import recettes from "./recettes";
+import withFirebase from "./hoc/withFirebase";
 
-class App extends Component {
-  state = {
-    pseudo: this.props.match.params.pseudo,
-    recettes: {}
-  };
+const App = ({
+  recettes,
+  match,
+  ajouterRecette,
+  majRecette,
+  supprimerRecette,
+  chargerExemple
+}) => {
+  const cards = Object.keys(recettes).map(key => {
+    return <Card key={key} details={recettes[key]} />;
+  });
 
-  componentDidMount() {
-    this.ref = base.syncState(`/${this.state.pseudo}/recettes`, {
-      context: this,
-      state: "recettes"
-    });
-  }
+  return (
+    <div className="box">
+      <Header pseudo={match.params.pseudo} />
+      <h1>Bonjour {match.params.pseudo}</h1>
+      <div className="cards">{cards}</div>
+      <Admin
+        pseudo={match.params.pseudo}
+        recettes={recettes}
+        ajouterRecette={ajouterRecette}
+        majRecette={majRecette}
+        supprimerRecette={supprimerRecette}
+        chargerExemple={chargerExemple}
+      />
+    </div>
+  );
+};
 
-  componentWillUnmount() {
-    //close the connection
-    base.removeBinding(this.ref);
-  }
+const WrappedComponent = withFirebase(App);
 
-  ajouterRecette = recette => {
-    const recettes = { ...this.state.recettes };
-    recettes[`recette-${Date.now()}`] = recette;
-    this.setState({ recettes });
-  };
-
-  majRecette = (key, newRecette) => {
-    // on fait une copie de tout le state existant
-    const recettes = { ...this.state.recettes };
-    // on passe la clé et la recette modifiée 
-    recettes[key] = newRecette;
-    // mise à jour de cette recette
-    this.setState({ recettes });
-  };
-
-  supprimerRecette = key => {
-    const recettes = { ...this.state.recettes };
-    recettes[key] = null;
-    this.setState({ recettes })
-  }
-
-  chargerExemple = recettes => this.setState({ recettes });
-
-  render() {
-    const cards = Object.keys(this.state.recettes).map(key => {
-      return <Card key={key} details={this.state.recettes[key]} />;
-    });
-
-    return (
-      <div className="box">
-        <Header pseudo={this.state.pseudo} />
-        <h1>Bonjour {this.state.pseudo}</h1>
-        <div className="cards">{cards}</div>
-        <Admin
-          pseudo={this.state.pseudo}
-          recettes={this.state.recettes}
-          ajouterRecette={this.ajouterRecette}
-          majRecette={this.majRecette}
-          supprimerRecette={this.supprimerRecette}
-          chargerExemple={() => this.chargerExemple(recettes)}
-        />
-      </div>
-    );
-  }
-}
-
-export default App;
+export default WrappedComponent;
